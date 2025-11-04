@@ -1,0 +1,56 @@
+import sqlite3
+from datetime import datetime
+
+# Connexion à la base de données (crée le fichier 'exemple.db' si inexistant)
+conn = sqlite3.connect('exemple.db')
+cursor = conn.cursor()
+
+# Création de la table (ex. : une table 'utilisateurs')
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS utilisateurs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nom TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        age INTEGER,
+        date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+''')
+
+# Fonction pour ajouter un utilisateur
+def ajouter_utilisateur(nom, email, age):
+    try:
+        cursor.execute(
+            'INSERT INTO utilisateurs (nom, email, age) VALUES (?, ?, ?)',
+            (nom, email, age)
+        )
+        conn.commit()
+        print(f"Utilisateur '{nom}' ajouté avec succès !")
+    except sqlite3.IntegrityError:
+        print(f"Erreur : Email '{email}' déjà utilisé.")
+
+# Fonction pour lire tous les utilisateurs
+def lister_utilisateurs():
+    cursor.execute('SELECT * FROM utilisateurs')
+    rows = cursor.fetchall()
+    if rows:
+        print("\n--- Liste des utilisateurs ---")
+        for row in rows:
+            print(f"ID: {row[0]}, Nom: {row[1]}, Email: {row[2]}, Âge: {row[3]}, Créé: {row[4]}")
+    else:
+        print("Aucun utilisateur trouvé.")
+
+# Fonction pour supprimer un utilisateur par ID
+def supprimer_utilisateur(user_id):
+    cursor.execute('DELETE FROM utilisateurs WHERE id = ?', (user_id,))
+    if cursor.rowcount > 0:
+        conn.commit()
+        print(f"Utilisateur ID {user_id} supprimé.")
+    else:
+        print(f"Utilisateur ID {user_id} non trouvé.")
+
+# Exemples d'utilisation
+if __name__ == "__main__":
+    print("=== Gestion de base de données SQLite ===")
+    
+    # Ajout d'utilisateurs
+    ajouter_utilisateur("Alice
